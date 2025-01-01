@@ -1,13 +1,13 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text;
-using LocalAI.NET.GPT4All.Models;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Exception = LocalAI.NET.GPT4All.Models.Exception;
 using JsonException = Newtonsoft.Json.JsonException;
 
 namespace LocalAI.NET.GPT4All.Providers.OpenAiCompatible
 {
-    public class OpenAiLmStudioProvider : IOpenAiLmStudioProvider
+    public class LocalAiProvider : ILocalAiProvider
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger? _logger;
@@ -15,7 +15,7 @@ namespace LocalAI.NET.GPT4All.Providers.OpenAiCompatible
         private readonly string _modelName;
         private bool _disposed;
 
-        public OpenAiLmStudioProvider(
+        public LocalAiProvider(
             HttpClient httpClient, 
             string modelName = "",
             ILogger? logger = null,
@@ -53,9 +53,9 @@ namespace LocalAI.NET.GPT4All.Providers.OpenAiCompatible
 
             if (!response.IsSuccessStatusCode)
             {
-                throw new LmStudioException(
+                throw new Exception(
                     "OpenAI completion request failed",
-                    "LMStudio",
+                    Provider.LocalAi,
                     (int)response.StatusCode,
                     responseContent);
             }

@@ -1,18 +1,18 @@
 ﻿using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text;
-using LocalAI.NET.GPT4All.Models;
 using LocalAI.NET.GPT4All.Models.Chat;
 using LocalAI.NET.GPT4All.Models.Completion;
 using LocalAI.NET.GPT4All.Models.Embedding;
 using LocalAI.NET.GPT4All.Models.Model;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Exception = LocalAI.NET.GPT4All.Models.Exception;
 using JsonException = Newtonsoft.Json.JsonException;
 
 namespace LocalAI.NET.GPT4All.Providers.Native
 {
-    public class NativeLmStudioProvider : INativeLmStudioProvider
+    public class NativeProvider : INativeProvider
     {
         private const string BASE_PATH = $"/v1";
         private const string MODELS_ENDPOINT = $"{BASE_PATH}/models";
@@ -25,7 +25,7 @@ namespace LocalAI.NET.GPT4All.Providers.Native
         private readonly JsonSerializerSettings? _jsonSettings;
         private bool _disposed;
 
-        public NativeLmStudioProvider(HttpClient httpClient, ILogger? logger = null, JsonSerializerSettings? jsonSettings = null)
+        public NativeProvider(HttpClient httpClient, ILogger? logger = null, JsonSerializerSettings? jsonSettings = null)
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _logger = logger;
@@ -41,9 +41,9 @@ namespace LocalAI.NET.GPT4All.Providers.Native
                 
                 return await DeserializeResponse<ModelsResponse>(response);
             }
-            catch (Exception ex) when (ex is not LmStudioException)
+            catch (System.Exception ex) when (ex is not Exception)
             {
-                throw new LmStudioException("Failed to list models", ex);
+                throw new Exception("Failed to list models", ex, Provider.Native);
             }
         }
 
@@ -56,9 +56,9 @@ namespace LocalAI.NET.GPT4All.Providers.Native
                 
                 return await DeserializeResponse<Model>(response);
             }
-            catch (Exception ex) when (ex is not LmStudioException)
+            catch (System.Exception ex) when (ex is not Exception)
             {
-                throw new LmStudioException($"Failed to get model {modelId}", ex);
+                throw new Exception($"Failed to get model {modelId}", ex, Provider.Native);
             }
         }
 
@@ -78,9 +78,9 @@ namespace LocalAI.NET.GPT4All.Providers.Native
                 
                 return result;
             }
-            catch (Exception ex) when (ex is not LmStudioException)
+            catch (System.Exception ex) when (ex is not Exception)
             {
-                throw new LmStudioException("Completion failed", ex);
+                throw new Exception("Completion failed", ex, Provider.Native);
             }
         }
 
@@ -100,9 +100,9 @@ namespace LocalAI.NET.GPT4All.Providers.Native
                 
                 return result;
             }
-            catch (Exception ex) when (ex is not LmStudioException)
+            catch (System.Exception ex) when (ex is not Exception)
             {
-                throw new LmStudioException("Chat completion failed", ex);
+                throw new Exception("Chat completion failed", ex, Provider.Native);
             }
         }
 
@@ -122,9 +122,9 @@ namespace LocalAI.NET.GPT4All.Providers.Native
                 
                 return result;
             }
-            catch (Exception ex) when (ex is not LmStudioException)
+            catch (System.Exception ex) when (ex is not Exception)
             {
-                throw new LmStudioException("Embedding creation failed", ex);
+                throw new Exception("Embedding creation failed", ex, Provider.Native);
             }
         }
 
@@ -177,9 +177,9 @@ namespace LocalAI.NET.GPT4All.Providers.Native
                 var content = await response.Content.ReadAsStringAsync();
                 _logger?.LogError("Response error: Status={Status}, Content={Content}", response.StatusCode, content);
                 
-                throw new LmStudioException(
+                throw new Exception(
                     errorMessage,
-                    "LMStudio",
+                    Provider.Native,
                     (int)response.StatusCode,
                     content);
             }
@@ -193,9 +193,9 @@ namespace LocalAI.NET.GPT4All.Providers.Native
                 var result = JsonConvert.DeserializeObject<T>(content, _jsonSettings);
                 if (result == null)
                 {
-                    throw new LmStudioException(
+                    throw new Exception(
                         "Null response after deserialization",
-                        "LMStudio",
+                        Provider.Native,
                         null,
                         content);
                 }
@@ -204,9 +204,9 @@ namespace LocalAI.NET.GPT4All.Providers.Native
             catch (JsonException ex)
             {
                 _logger?.LogError(ex, "Failed to deserialize response: {Content}", content);
-                throw new LmStudioException(
+                throw new Exception(
                     "Failed to deserialize response",
-                    "LMStudio",
+                    Provider.Native,
                     null,
                     $"Content: {content}, Error: {ex.Message}");
             }

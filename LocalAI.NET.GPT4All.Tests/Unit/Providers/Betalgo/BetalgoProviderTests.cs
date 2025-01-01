@@ -4,7 +4,7 @@ using FluentAssertions;
 using LocalAI.NET.GPT4All.Models.Chat;
 using LocalAI.NET.GPT4All.Models.Completion;
 using LocalAI.NET.GPT4All.Models.Embedding;
-using LocalAI.NET.GPT4All.Providers.BetalgoOpenAI;
+using LocalAI.NET.GPT4All.Providers.Betalgo;
 using LocalAI.NET.GPT4All.Tests.Common;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -13,17 +13,17 @@ using WireMock.ResponseBuilders;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace LocalAI.NET.GPT4All.Tests.Unit.Providers.BetalgoOpenAI
+namespace LocalAI.NET.GPT4All.Tests.Unit.Providers.Betalgo
 {
-   public class BetalgoOpenAiProviderTests : LmStudioTestBase
+   public class BetalgoProviderTests : TestBase
    {
-       private readonly BetalgoOpenAiProvider _provider;
+       private readonly BetalgoProvider _provider;
 
-       public BetalgoOpenAiProviderTests(ITestOutputHelper output) : base(output)
+       public BetalgoProviderTests(ITestOutputHelper output) : base(output)
        {
            var options = new OpenAIOptions { ApiKey = "test", BaseDomain = BaseUrl };
            var openAiService = new OpenAIService(options);
-           _provider = new BetalgoOpenAiProvider(openAiService, logger: Logger);
+           _provider = new BetalgoProvider(openAiService, logger: Logger);
        }
 
        [Fact]

@@ -13,12 +13,12 @@ namespace LocalAI.NET.GPT4All.Client
 {
     public class Gpt4AllClient : IDisposable
     {
-        private readonly INativeLmStudioProvider? _nativeProvider;
-        private readonly IOpenAiLmStudioProvider? _openAiProvider;
+        private readonly INativeProvider? _nativeProvider;
+        private readonly ILocalAiProvider? _openAiProvider;
         private readonly Options _options;
         private bool _disposed;
 
-        public string Name => "LMStudio";
+        public string Name { get; set; }
         public string? Version { get; private set; }
         public bool SupportsStreaming => true;
 
@@ -42,11 +42,11 @@ namespace LocalAI.NET.GPT4All.Client
 
             if (options.UseOpenAiApi)
             {
-                _openAiProvider = new OpenAiLmStudioProvider(httpClient, logger: logger, jsonSettings: jsonSettings);
+                _openAiProvider = new LocalAiProvider(httpClient, logger: logger, jsonSettings: jsonSettings);
             }
             else
             {
-                _nativeProvider = new NativeLmStudioProvider(httpClient, logger: logger, jsonSettings: jsonSettings);
+                _nativeProvider = new NativeProvider(httpClient, logger: logger, jsonSettings: jsonSettings);
             }
         }
 

@@ -3,7 +3,6 @@ using Betalgo.Ranul.OpenAI.Interfaces;
 using Betalgo.Ranul.OpenAI.ObjectModels.RequestModels;
 using Betalgo.Ranul.OpenAI.ObjectModels.ResponseModels;
 using Betalgo.Ranul.OpenAI.ObjectModels.SharedModels;
-using LocalAI.NET.GPT4All.Models;
 using LocalAI.NET.GPT4All.Models.Base;
 using LocalAI.NET.GPT4All.Models.Chat;
 using LocalAI.NET.GPT4All.Models.Completion;
@@ -14,16 +13,17 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using ChatMessage = Betalgo.Ranul.OpenAI.ObjectModels.RequestModels.ChatMessage;
 using EmbeddingResponse = LocalAI.NET.GPT4All.Models.Embedding.EmbeddingResponse;
+using Exception = LocalAI.NET.GPT4All.Models.Exception;
 
-namespace LocalAI.NET.GPT4All.Providers.BetalgoOpenAI
+namespace LocalAI.NET.GPT4All.Providers.Betalgo
 {
-   public class BetalgoOpenAiProvider : INativeLmStudioProvider
+   public class BetalgoProvider : INativeProvider
    {
        private readonly IOpenAIService _client;
        private readonly ILogger? _logger;
        private bool _disposed;
 
-       public BetalgoOpenAiProvider(IOpenAIService client, ILogger? logger = null)
+       public BetalgoProvider(IOpenAIService client, ILogger? logger = null)
        {
            _client = client;
            _logger = logger;
@@ -75,7 +75,7 @@ namespace LocalAI.NET.GPT4All.Providers.BetalgoOpenAI
            {
                var error = JsonConvert.SerializeObject(response);
                _logger?.LogError("Completion failed with response: {Error}", error);
-               throw new LmStudioException($"Completion failed: {response.Error?.Message ?? "No choices returned"}", "LMStudio", responseContent: error);
+               throw new Exception($"Completion failed: {response.Error?.Message ?? "No choices returned"}", Provider.Betalgo, responseContent: error);
            }
 
            var result = new CompletionResponse
@@ -139,7 +139,7 @@ namespace LocalAI.NET.GPT4All.Providers.BetalgoOpenAI
            {
                Object = "list",
                Model = request.Model,
-               Data = (response.Data ?? new List<Betalgo.Ranul.OpenAI.ObjectModels.ResponseModels.EmbeddingResponse>()).Select((e, i) => new EmbeddingResponse.EmbeddingData
+               Data = (response.Data ?? new List<global::Betalgo.Ranul.OpenAI.ObjectModels.ResponseModels.EmbeddingResponse>()).Select((e, i) => new EmbeddingResponse.EmbeddingData
                {
                    Object = "embedding",
                    Embedding = (e.Embedding ?? new List<double>()).Select(d => (float)d).ToArray(),

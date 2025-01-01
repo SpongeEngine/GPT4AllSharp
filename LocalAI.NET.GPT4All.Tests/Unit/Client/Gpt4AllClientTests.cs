@@ -14,7 +14,7 @@ using Xunit.Abstractions;
 
 namespace LocalAI.NET.GPT4All.Tests.Unit.Client
 {
-    public class Gpt4AllClientTests : LmStudioTestBase
+    public class Gpt4AllClientTests : TestBase
     {
         private readonly Gpt4AllClient _client;
 

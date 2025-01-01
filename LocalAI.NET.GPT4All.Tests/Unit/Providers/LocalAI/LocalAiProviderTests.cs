@@ -6,17 +6,17 @@ using WireMock.ResponseBuilders;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace LocalAI.NET.GPT4All.Tests.Unit.Providers.OpenAiCompatible
+namespace LocalAI.NET.GPT4All.Tests.Unit.Providers.LocalAI
 {
-    public class OpenAiLmStudioProviderTests : LmStudioTestBase
+    public class LocalAiProviderTests : TestBase
     {
-        private readonly OpenAiLmStudioProvider _provider;
+        private readonly LocalAiProvider _provider;
         private readonly HttpClient _httpClient;
 
-        public OpenAiLmStudioProviderTests(ITestOutputHelper output) : base(output)
+        public LocalAiProviderTests(ITestOutputHelper output) : base(output)
         {
             _httpClient = new HttpClient { BaseAddress = new Uri(BaseUrl) };
-            _provider = new OpenAiLmStudioProvider(_httpClient, logger: Logger);
+            _provider = new LocalAiProvider(_httpClient, logger: Logger);
         }
 
         [Fact]

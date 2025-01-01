@@ -5,7 +5,7 @@ using LocalAI.NET.GPT4All.Models.Model;
 
 namespace LocalAI.NET.GPT4All.Providers.Native
 {
-    public interface INativeLmStudioProvider : IDisposable
+    public interface INativeProvider : IDisposable
     {
         Task<ModelsResponse> ListModelsAsync(CancellationToken cancellationToken = default);
         Task<Model> GetModelAsync(string modelId, CancellationToken cancellationToken = default);

@@ -4,13 +4,13 @@ using Xunit.Abstractions;
 
 namespace LocalAI.NET.GPT4All.Tests.Common
 {
-    public abstract class LmStudioTestBase : IDisposable
+    public abstract class TestBase : IDisposable
     {
         protected readonly WireMockServer Server;
         protected readonly ILogger Logger;
         protected readonly string BaseUrl;
 
-        protected LmStudioTestBase(ITestOutputHelper output)
+        protected TestBase(ITestOutputHelper output)
         {
             Server = WireMockServer.Start();
             BaseUrl = Server.Urls[0];

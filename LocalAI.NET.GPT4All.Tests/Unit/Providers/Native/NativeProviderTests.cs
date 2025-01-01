@@ -14,15 +14,15 @@ using Xunit.Abstractions;
 
 namespace LocalAI.NET.GPT4All.Tests.Unit.Providers.Native
 {
-    public class NativeLmStudioProviderTests : LmStudioTestBase
+    public class NativeProviderTests : TestBase
     {
-        private readonly NativeLmStudioProvider _provider;
+        private readonly NativeProvider _provider;
         private readonly HttpClient _httpClient;
 
-        public NativeLmStudioProviderTests(ITestOutputHelper output) : base(output)
+        public NativeProviderTests(ITestOutputHelper output) : base(output)
         {
             _httpClient = new HttpClient { BaseAddress = new Uri(BaseUrl) };
-            _provider = new NativeLmStudioProvider(_httpClient, Logger);
+            _provider = new NativeProvider(_httpClient, Logger);
         }
 
         [Fact]
