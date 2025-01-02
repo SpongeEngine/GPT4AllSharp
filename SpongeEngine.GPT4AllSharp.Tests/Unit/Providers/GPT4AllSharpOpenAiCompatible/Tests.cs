@@ -1,5 +1,4 @@
 ﻿using FluentAssertions;
-using SpongeEngine.GPT4AllSharp.Providers.LocalAI;
 using SpongeEngine.GPT4AllSharp.Tests.Common;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
@@ -8,12 +7,12 @@ using Xunit.Abstractions;
 
 namespace SpongeEngine.GPT4AllSharp.Tests.Unit.Providers.LocalAI
 {
-    public class LocalAiProviderTests : TestBase
+    public class Tests : TestBase
     {
         private readonly LocalAiProvider _provider;
         private readonly HttpClient _httpClient;
 
-        public LocalAiProviderTests(ITestOutputHelper output) : base(output)
+        public Tests(ITestOutputHelper output) : base(output)
         {
             _httpClient = new HttpClient { BaseAddress = new Uri(BaseUrl) };
             _provider = new LocalAiProvider(_httpClient, logger: Logger);

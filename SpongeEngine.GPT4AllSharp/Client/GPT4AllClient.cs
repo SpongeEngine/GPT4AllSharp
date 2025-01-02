@@ -1,171 +1,174 @@
 ﻿using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Runtime.CompilerServices;
+using System.Text;
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using SpongeEngine.GPT4AllSharp.Models.Base;
-using SpongeEngine.GPT4AllSharp.Models.Chat;
-using SpongeEngine.GPT4AllSharp.Models.Completion;
-using SpongeEngine.GPT4AllSharp.Models.Embedding;
-using SpongeEngine.GPT4AllSharp.Models.Model;
-using SpongeEngine.GPT4AllSharp.Providers.LocalAI;
-using SpongeEngine.GPT4AllSharp.Providers.Native;
+using SpongeEngine.GPT4AllSharp.Models;
 
 namespace SpongeEngine.GPT4AllSharp.Client
 {
     public class Gpt4AllClient : IDisposable
     {
-        private readonly INativeProvider? _nativeProvider;
-        private readonly ILocalAiProvider? _openAiProvider;
-        private readonly Options _options;
+        private readonly HttpClient _httpClient;
+        private readonly ILogger? _logger;
         private bool _disposed;
 
-        public string Name { get; set; }
-        public string? Version { get; private set; }
-        public bool SupportsStreaming => true;
-
-        public Gpt4AllClient(Options options, ILogger? logger = null, JsonSerializerSettings? jsonSettings = null)
+        public Gpt4AllClient(ClientOptions options, ILogger? logger = null)
         {
-            _options = options ?? throw new ArgumentNullException(nameof(options));
-
-            var httpClient = new HttpClient
+            if (options == null) throw new ArgumentNullException(nameof(options));
+            
+            _logger = logger;
+            _httpClient = new HttpClient
             {
-                BaseAddress = new Uri(options.BaseUrl),
+                BaseAddress = new Uri($"http://localhost:{options.Port}/v1/"),
                 Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds)
             };
 
-            httpClient.DefaultRequestHeaders.Accept.Add(
-                new MediaTypeWithQualityHeaderValue("text/event-stream"));
-
-            if (!string.IsNullOrEmpty(options.ApiKey))
-            {
-                httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {options.ApiKey}");
-            }
-
-            if (options.UseOpenAiApi)
-            {
-                _openAiProvider = new LocalAiProvider(httpClient, logger: logger, jsonSettings: jsonSettings);
-            }
-            else
-            {
-                _nativeProvider = new NativeProvider(httpClient, logger: logger, jsonSettings: jsonSettings);
-            }
+            _httpClient.DefaultRequestHeaders.Accept.Add(
+                new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
         /// <summary>
-        /// Lists all loaded and downloaded models.
+        /// Lists all available models.
         /// GET /v1/models
         /// </summary>
-        public Task<ModelsResponse> ListModelsAsync(CancellationToken cancellationToken = default)
+        public async Task<ModelsResponse> ListModelsAsync(CancellationToken cancellationToken = default)
         {
-            EnsureNativeProvider();
-            return _nativeProvider!.ListModelsAsync(cancellationToken);
+            try
+            {
+                var response = await _httpClient.GetFromJsonAsync<ModelsResponse>("models", cancellationToken);
+                return response ?? new ModelsResponse { Data = Array.Empty<Model>() };
+            }
+            catch (Exception ex) when (ex is not Gpt4AllException)
+            {
+                throw new Gpt4AllException("Failed to list models", ex);
+            }
         }
 
         /// <summary>
-        /// Gets info about a specific model.
-        /// GET /v1/models/{model}
+        /// Gets details about a specific model.
+        /// GET /v1/models/{name}
         /// </summary>
-        public Task<Gpt4AllSharpModel> GetModelAsync(string modelId, CancellationToken cancellationToken = default)
+        public async Task<Model> GetModelAsync(string modelName, CancellationToken cancellationToken = default)
         {
-            EnsureNativeProvider();
-            return _nativeProvider!.GetModelAsync(modelId, cancellationToken);
+            try
+            {
+                var response = await _httpClient.GetFromJsonAsync<Model>($"models/{modelName}", cancellationToken);
+                return response ?? throw new Gpt4AllException($"Model {modelName} not found");
+            }
+            catch (Exception ex) when (ex is not Gpt4AllException)
+            {
+                throw new Gpt4AllException($"Failed to get model {modelName}", ex);
+            }
         }
 
         /// <summary>
-        /// Text Completions API. Provides a prompt and receives a completion.
+        /// Creates a completion for the provided prompt.
         /// POST /v1/completions
         /// </summary>
-        public Task<CompletionResponse> CompleteAsync(
-            CompletionRequest request, 
+        public async Task<CompletionResponse> CreateCompletionAsync(
+            CompletionRequest request,
             CancellationToken cancellationToken = default)
         {
-            EnsureNativeProvider();
-            return _nativeProvider!.CompleteAsync(request, cancellationToken);
+            return await SendRequestAsync<CompletionResponse>("completions", request, cancellationToken);
         }
 
         /// <summary>
-        /// Streaming Text Completions API.
-        /// POST /v1/completions with stream=true
-        /// </summary>
-        public IAsyncEnumerable<string> StreamCompletionAsync(
-            CompletionRequest request, 
-            CancellationToken cancellationToken = default)
-        {
-            EnsureNativeProvider();
-            return _nativeProvider!.StreamCompletionAsync(request, cancellationToken);
-        }
-
-        /// <summary>
-        /// Chat Completions API. Provides messages array and receives assistant response.
+        /// Creates a chat completion for the provided messages.
         /// POST /v1/chat/completions
         /// </summary>
-        public Task<ChatResponse> ChatCompleteAsync(
-            ChatRequest request, 
+        public async Task<ChatCompletionResponse> CreateChatCompletionAsync(
+            ChatCompletionRequest request,
             CancellationToken cancellationToken = default)
         {
-            EnsureNativeProvider();
-            return _nativeProvider!.ChatCompleteAsync(request, cancellationToken);
+            return await SendRequestAsync<ChatCompletionResponse>("chat/completions", request, cancellationToken);
         }
 
         /// <summary>
-        /// Streaming Chat Completions API.
+        /// Streams a chat completion for the provided messages.
         /// POST /v1/chat/completions with stream=true
         /// </summary>
-        public IAsyncEnumerable<string> StreamChatAsync(
-            ChatRequest request, 
-            CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<ChatCompletionResponse> StreamChatCompletionAsync(
+            ChatCompletionRequest request,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            EnsureNativeProvider();
-            return _nativeProvider!.StreamChatAsync(request, cancellationToken);
+            request.Stream = true;
+
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, "chat/completions")
+            {
+                Content = new StringContent(
+                    JsonSerializer.Serialize(request),
+                    Encoding.UTF8,
+                    "application/json")
+            };
+
+            httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
+
+            using var response = await _httpClient.SendAsync(
+                httpRequest, 
+                HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken);
+
+            await EnsureSuccessStatusCodeAsync(response);
+
+            using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            using var reader = new StreamReader(stream);
+
+            while (!reader.EndOfStream && !cancellationToken.IsCancellationRequested)
+            {
+                var line = await reader.ReadLineAsync();
+                if (string.IsNullOrEmpty(line)) continue;
+                if (!line.StartsWith("data: ")) continue;
+
+                var data = line[6..];
+                if (data == "[DONE]") break;
+
+                try
+                {
+                    var completionResponse = JsonSerializer.Deserialize<ChatCompletionResponse>(data);
+                    if (completionResponse != null)
+                    {
+                        yield return completionResponse;
+                    }
+                }
+                catch (JsonException ex)
+                {
+                    _logger?.LogWarning(ex, "Failed to parse SSE message: {Message}", data);
+                }
+            }
         }
 
-        /// <summary>
-        /// Text Embeddings API. Provides text and receives embedding vector.
-        /// POST /v1/embeddings
-        /// </summary>
-        public Task<EmbeddingResponse> CreateEmbeddingAsync(
-            EmbeddingRequest request, 
-            CancellationToken cancellationToken = default)
+        private async Task<T> SendRequestAsync<T>(string endpoint, object request, CancellationToken cancellationToken)
         {
-            EnsureNativeProvider();
-            return _nativeProvider!.CreateEmbeddingAsync(request, cancellationToken);
+            try
+            {
+                var content = new StringContent(
+                    JsonSerializer.Serialize(request),
+                    Encoding.UTF8,
+                    "application/json");
+
+                using var response = await _httpClient.PostAsync(endpoint, content, cancellationToken);
+                await EnsureSuccessStatusCodeAsync(response);
+
+                var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                var result = JsonSerializer.Deserialize<T>(responseContent);
+                return result ?? throw new Gpt4AllException("Null response from API");
+            }
+            catch (Exception ex) when (ex is not Gpt4AllException)
+            {
+                throw new Gpt4AllException($"API request to {endpoint} failed", ex);
+            }
         }
 
-        // OpenAI API methods
-        public Task<string> CompleteWithOpenAiAsync(
-            string prompt, 
-            CompletionOptions? options = null, 
-            CancellationToken cancellationToken = default)
+        private async Task EnsureSuccessStatusCodeAsync(HttpResponseMessage response)
         {
-            EnsureOpenAiProvider();
-            return _openAiProvider!.CompleteAsync(prompt, options, cancellationToken);
-        }
-
-        public IAsyncEnumerable<string> StreamCompletionWithOpenAiAsync(
-            string prompt, 
-            CompletionOptions? options = null, 
-            CancellationToken cancellationToken = default)
-        {
-            EnsureOpenAiProvider();
-            return _openAiProvider!.StreamCompletionAsync(prompt, options, cancellationToken);
-        }
-
-        public async Task<bool> IsAvailableAsync(CancellationToken cancellationToken = default)
-        {
-            return _options.UseOpenAiApi 
-                ? await _openAiProvider!.IsAvailableAsync(cancellationToken)
-                : await _nativeProvider!.IsAvailableAsync(cancellationToken);
-        }
-
-        private void EnsureNativeProvider()
-        {
-            if (_nativeProvider == null)
-                throw new InvalidOperationException("Native API is not enabled. Set UseOpenAiApi to false in options.");
-        }
-
-        private void EnsureOpenAiProvider()
-        {
-            if (_openAiProvider == null)
-                throw new InvalidOperationException("OpenAI API is not enabled. Set UseOpenAiApi to true in options.");
+            if (!response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                throw new Gpt4AllException(
+                    $"API request failed with status {response.StatusCode}: {content}");
+            }
         }
 
         protected virtual void Dispose(bool disposing)
@@ -174,8 +177,7 @@ namespace SpongeEngine.GPT4AllSharp.Client
             {
                 if (disposing)
                 {
-                    _nativeProvider?.Dispose();
-                    _openAiProvider?.Dispose();
+                    _httpClient.Dispose();
                 }
                 _disposed = true;
             }

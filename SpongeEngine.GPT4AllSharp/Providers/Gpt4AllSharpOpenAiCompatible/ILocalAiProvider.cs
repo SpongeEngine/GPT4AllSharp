@@ -1,4 +1,4 @@
-﻿namespace SpongeEngine.GPT4AllSharp.Providers.LocalAI
+﻿namespace SpongeEngine.GPT4AllSharp.Providers.GPT4AllSharpOpenAiCompatible
 {
     public interface ILocalAiProvider : IDisposable
     {

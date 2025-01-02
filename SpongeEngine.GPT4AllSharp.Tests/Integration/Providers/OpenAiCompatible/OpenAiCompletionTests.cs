@@ -1,5 +1,5 @@
 ﻿using FluentAssertions;
-using SpongeEngine.GPT4AllSharp.Providers.LocalAI;
+using SpongeEngine.GPT4AllSharp.Providers.GPT4AllSharpOpenAiCompatible;
 using Xunit;
 using Xunit.Abstractions;
 

@@ -2,10 +2,10 @@
 using System.Text;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Exception = SpongeEngine.GPT4AllSharp.Models.Exception;
+using SpongeEngine.GPT4AllSharp.Models;
 using JsonException = Newtonsoft.Json.JsonException;
 
-namespace SpongeEngine.GPT4AllSharp.Providers.LocalAI
+namespace SpongeEngine.GPT4AllSharp.Providers.GPT4AllSharpOpenAiCompatible
 {
     public class LocalAiProvider : ILocalAiProvider
     {
@@ -53,7 +53,7 @@ namespace SpongeEngine.GPT4AllSharp.Providers.LocalAI
 
             if (!response.IsSuccessStatusCode)
             {
-                throw new Exception(
+                throw new Gpt4AllException(
                     "OpenAI completion request failed",
                     Provider.LocalAi,
                     (int)response.StatusCode,

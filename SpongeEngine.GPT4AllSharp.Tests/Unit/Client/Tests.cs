@@ -1,11 +1,7 @@
 ﻿using FluentAssertions;
 using Newtonsoft.Json;
 using SpongeEngine.GPT4AllSharp.Client;
-using SpongeEngine.GPT4AllSharp.Models.Base;
-using SpongeEngine.GPT4AllSharp.Models.Chat;
-using SpongeEngine.GPT4AllSharp.Models.Completion;
-using SpongeEngine.GPT4AllSharp.Models.Embedding;
-using SpongeEngine.GPT4AllSharp.Models.Model;
+using SpongeEngine.GPT4AllSharp.Models;
 using SpongeEngine.GPT4AllSharp.Tests.Common;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
@@ -14,13 +10,13 @@ using Xunit.Abstractions;
 
 namespace SpongeEngine.GPT4AllSharp.Tests.Unit.Client
 {
-    public class Gpt4AllClientTests : TestBase
+    public class Tests : TestBase
     {
         private readonly Gpt4AllClient _client;
 
-        public Gpt4AllClientTests(ITestOutputHelper output) : base(output)
+        public Tests(ITestOutputHelper output) : base(output)
         {
-            _client = new Gpt4AllClient(new Options
+            _client = new Gpt4AllClient(new ClientOptions
             {
                 BaseUrl = BaseUrl
             }, Logger);
@@ -148,7 +144,7 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Unit.Client
         public async Task ChatCompleteAsync_WithNativeApi_ShouldReturn()
         {
             // Arrange
-            var request = new ChatRequest
+            var request = new ChatCompletionRequest
             {
                 Model = "test-model",
                 Messages = new List<ChatMessage>
@@ -158,7 +154,7 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Unit.Client
                 Temperature = 0.7f
             };
 
-            var expectedResponse = new ChatResponse
+            var expectedResponse = new ChatCompletionResponse
             {
                 Id = "chat-123",
                 Object = "chat.completion",
@@ -274,7 +270,7 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Unit.Client
         public async Task StreamChatAsync_WithNativeApi_ShouldStreamTokens()
         {
             // Arrange
-            var request = new ChatRequest
+            var request = new ChatCompletionRequest
             {
                 Model = "test-model",
                 Messages = new List<ChatMessage>

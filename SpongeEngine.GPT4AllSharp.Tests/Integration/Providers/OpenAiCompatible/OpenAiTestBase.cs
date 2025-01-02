@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using SpongeEngine.GPT4AllSharp.Providers.LocalAI;
+using SpongeEngine.GPT4AllSharp.Providers.GPT4AllSharpOpenAiCompatible;
 using SpongeEngine.GPT4AllSharp.Tests.Common;
 using Xunit;
 using Xunit.Abstractions;

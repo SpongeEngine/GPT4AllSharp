@@ -1,13 +1,13 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
-namespace SpongeEngine.GPT4AllSharp.Models.Chat
+namespace SpongeEngine.GPT4AllSharp.Models
 {
     public class ChatMessage
     {
-        [JsonProperty("role")]
+        [JsonPropertyName("role")]
         public string Role { get; set; } = string.Empty;
-    
-        [JsonProperty("content")]
+
+        [JsonPropertyName("content")]
         public string Content { get; set; } = string.Empty;
     }
 }
