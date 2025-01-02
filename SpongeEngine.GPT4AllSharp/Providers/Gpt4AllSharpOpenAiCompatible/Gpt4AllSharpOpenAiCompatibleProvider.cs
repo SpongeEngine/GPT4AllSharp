@@ -7,7 +7,7 @@ using JsonException = Newtonsoft.Json.JsonException;
 
 namespace SpongeEngine.GPT4AllSharp.Providers.GPT4AllSharpOpenAiCompatible
 {
-    public class LocalAiProvider : ILocalAiProvider
+    public class Gpt4AllSharpOpenAiCompatibleProvider : IGpt4AllSharpOpenAiCompatibleProvider
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger? _logger;
@@ -15,7 +15,7 @@ namespace SpongeEngine.GPT4AllSharp.Providers.GPT4AllSharpOpenAiCompatible
         private readonly string _modelName;
         private bool _disposed;
 
-        public LocalAiProvider(
+        public Gpt4AllSharpOpenAiCompatibleProvider(
             HttpClient httpClient, 
             string modelName = "",
             ILogger? logger = null,
@@ -55,9 +55,8 @@ namespace SpongeEngine.GPT4AllSharp.Providers.GPT4AllSharpOpenAiCompatible
             {
                 throw new Gpt4AllException(
                     "OpenAI completion request failed",
-                    Provider.LocalAi,
-                    (int)response.StatusCode,
-                    responseContent);
+                    statusCode: (int)response.StatusCode,
+                    responseContent: responseContent);
             }
 
             var result = JsonConvert.DeserializeObject<OpenAiResponse>(responseContent, _jsonSettings);

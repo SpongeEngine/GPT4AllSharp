@@ -18,7 +18,7 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Integration.Providers.OpenAiCompatible
             Skip.If(!ServerAvailable, "OpenAI endpoint not available");
 
             // Arrange & Act
-            var response = await Provider.CompleteAsync(
+            var response = await CompatibleProvider.CompleteAsync(
                 "Once upon a time",
                 new CompletionOptions
                 {
@@ -39,7 +39,7 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Integration.Providers.OpenAiCompatible
             Skip.If(!ServerAvailable, "OpenAI endpoint not available");
 
             // Arrange & Act
-            var response = await Provider.CompleteAsync(
+            var response = await CompatibleProvider.CompleteAsync(
                 "Write a short story",
                 new CompletionOptions
                 {
@@ -64,7 +64,7 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Integration.Providers.OpenAiCompatible
             foreach (var temp in temperatures)
             {
                 // Arrange & Act
-                var response = await Provider.CompleteAsync(
+                var response = await CompatibleProvider.CompleteAsync(
                     "The quick brown fox",
                     new CompletionOptions
                     {
@@ -103,7 +103,7 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Integration.Providers.OpenAiCompatible
 
             try
             {
-                await foreach (var token in Provider.StreamCompletionAsync(
+                await foreach (var token in CompatibleProvider.StreamCompletionAsync(
                     "Write a short story about",
                     options,
                     cts.Token))
@@ -146,7 +146,7 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Integration.Providers.OpenAiCompatible
 
             try
             {
-                await foreach (var token in Provider.StreamCompletionAsync(
+                await foreach (var token in CompatibleProvider.StreamCompletionAsync(
                     "Write a short story about",
                     options,
                     cts.Token))

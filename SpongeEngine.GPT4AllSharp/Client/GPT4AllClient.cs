@@ -124,17 +124,21 @@ namespace SpongeEngine.GPT4AllSharp.Client
                 var data = line[6..];
                 if (data == "[DONE]") break;
 
+                ChatCompletionResponse? completionResponse = null;
+
                 try
                 {
-                    var completionResponse = JsonSerializer.Deserialize<ChatCompletionResponse>(data);
-                    if (completionResponse != null)
-                    {
-                        yield return completionResponse;
-                    }
+                    completionResponse = JsonSerializer.Deserialize<ChatCompletionResponse>(data);
                 }
                 catch (JsonException ex)
                 {
                     _logger?.LogWarning(ex, "Failed to parse SSE message: {Message}", data);
+                    continue;
+                }
+
+                if (completionResponse != null)
+                {
+                    yield return completionResponse;
                 }
             }
         }

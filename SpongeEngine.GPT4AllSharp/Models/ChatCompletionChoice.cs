@@ -1,5 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 
+using System.Text.Json.Serialization;
+
 namespace SpongeEngine.GPT4AllSharp.Models
 {
     public class ChatCompletionChoice
@@ -15,5 +17,8 @@ namespace SpongeEngine.GPT4AllSharp.Models
 
         [JsonPropertyName("references")]
         public List<Reference>? References { get; set; }
+
+        [JsonPropertyName("delta")]
+        public ChatMessage? Delta { get; set; }
     }
 }

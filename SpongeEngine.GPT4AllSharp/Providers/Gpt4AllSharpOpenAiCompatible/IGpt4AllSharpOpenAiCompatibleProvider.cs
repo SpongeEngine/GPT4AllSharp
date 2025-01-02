@@ -1,6 +1,6 @@
 ﻿namespace SpongeEngine.GPT4AllSharp.Providers.GPT4AllSharpOpenAiCompatible
 {
-    public interface ILocalAiProvider : IDisposable
+    public interface IGpt4AllSharpOpenAiCompatibleProvider : IDisposable
     {
         Task<string> CompleteAsync(string prompt, CompletionOptions? options = null, CancellationToken cancellationToken = default);
         IAsyncEnumerable<string> StreamCompletionAsync(string prompt, CompletionOptions? options = null, CancellationToken cancellationToken = default);

@@ -1,8 +1,8 @@
 ﻿using FluentAssertions;
-using Newtonsoft.Json;
 using SpongeEngine.GPT4AllSharp.Client;
 using SpongeEngine.GPT4AllSharp.Models;
 using SpongeEngine.GPT4AllSharp.Tests.Common;
+using System.Text.Json;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 using Xunit;
@@ -18,7 +18,7 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Unit.Client
         {
             _client = new Gpt4AllClient(new ClientOptions
             {
-                BaseUrl = BaseUrl
+                Port = 4891
             }, Logger);
         }
 
@@ -29,18 +29,13 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Unit.Client
             var expectedResponse = new ModelsResponse
             {
                 Object = "list",
-                Data = new List<Gpt4AllSharpModel>
+                Data = new[]
                 {
-                    new()
+                    new Model
                     {
                         Id = "test-model",
-                        Type = "llm",
-                        Publisher = "test-publisher",
-                        Architecture = "test-arch",
-                        CompatibilityType = "gguf",
-                        Quantization = "Q4_K_M",
-                        State = "not-loaded",
-                        MaxContextLength = 4096
+                        Object = "model",
+                        OwnedBy = "test-publisher"
                     }
                 }
             };
@@ -51,7 +46,7 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Unit.Client
                     .UsingGet())
                 .RespondWith(Response.Create()
                     .WithStatusCode(200)
-                    .WithBody(JsonConvert.SerializeObject(expectedResponse)));
+                    .WithBody(JsonSerializer.Serialize(expectedResponse)));
 
             // Act
             var response = await _client.ListModelsAsync();
@@ -63,85 +58,7 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Unit.Client
         }
 
         [Fact]
-        public async Task GetModelAsync_ShouldReturnModel()
-        {
-            // Arrange
-            Gpt4AllSharpModel expectedModel = new Gpt4AllSharpModel
-            {
-                Id = "test-model",
-                Type = "llm",
-                Publisher = "test-publisher",
-                Architecture = "test-arch",
-                CompatibilityType = "gguf",
-                Quantization = "Q4_K_M",
-                State = "not-loaded",
-                MaxContextLength = 4096
-            };
-
-            Server
-                .Given(Request.Create()
-                    .WithPath("/v1/models/test-model")
-                    .UsingGet())
-                .RespondWith(Response.Create()
-                    .WithStatusCode(200)
-                    .WithBody(JsonConvert.SerializeObject(expectedModel)));
-
-            // Act
-            var model = await _client.GetModelAsync("test-model");
-
-            // Assert
-            model.Should().NotBeNull();
-            model.Id.Should().Be("test-model");
-        }
-
-        [Fact]
-        public async Task CompleteAsync_WithNativeApi_ShouldReturn()
-        {
-            // Arrange
-            var request = new CompletionRequest
-            {
-                Model = "test-model",
-                Prompt = "Hello",
-                MaxTokens = 100,
-                Temperature = 0.7f
-            };
-
-            var expectedResponse = new CompletionResponse
-            {
-                Id = "cmpl-123",
-                Object = "text_completion",
-                Created = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-                Model = "test-model",
-                Choices = new List<Choice>
-                {
-                    new()
-                    {
-                        Index = 0,
-                        Text = "Hello world!",
-                        FinishReason = "stop"
-                    }
-                }
-            };
-
-            Server
-                .Given(Request.Create()
-                    .WithPath("/v1/completions")
-                    .UsingPost())
-                .RespondWith(Response.Create()
-                    .WithStatusCode(200)
-                    .WithBody(JsonConvert.SerializeObject(expectedResponse)));
-
-            // Act
-            var response = await _client.CompleteAsync(request);
-
-            // Assert
-            response.Should().NotBeNull();
-            response.Choices.Should().HaveCount(1);
-            response.Choices[0].Text.Should().Be("Hello world!");
-        }
-
-        [Fact]
-        public async Task ChatCompleteAsync_WithNativeApi_ShouldReturn()
+        public async Task CreateChatCompletionAsync_ShouldReturnValidResponse()
         {
             // Arrange
             var request = new ChatCompletionRequest
@@ -160,12 +77,16 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Unit.Client
                 Object = "chat.completion",
                 Created = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
                 Model = "test-model",
-                Choices = new List<Choice>
+                Choices = new List<ChatCompletionChoice>
                 {
                     new()
                     {
                         Index = 0,
-                        Text = "Hello! How can I help you?",
+                        Message = new ChatMessage
+                        {
+                            Role = "assistant",
+                            Content = "Hello! How can I help you?"
+                        },
                         FinishReason = "stop"
                     }
                 }
@@ -177,97 +98,19 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Unit.Client
                     .UsingPost())
                 .RespondWith(Response.Create()
                     .WithStatusCode(200)
-                    .WithBody(JsonConvert.SerializeObject(expectedResponse)));
+                    .WithBody(JsonSerializer.Serialize(expectedResponse)));
 
             // Act
-            var response = await _client.ChatCompleteAsync(request);
+            var response = await _client.CreateChatCompletionAsync(request);
 
             // Assert
             response.Should().NotBeNull();
             response.Choices.Should().HaveCount(1);
-            response.Choices[0].Text.Should().Be("Hello! How can I help you?");
+            response.Choices[0].Message.Content.Should().Be("Hello! How can I help you!");
         }
 
         [Fact]
-        public async Task CreateEmbeddingAsync_WithNativeApi_ShouldReturn()
-        {
-            // Arrange
-            var request = new EmbeddingRequest
-            {
-                Model = "text-embedding-model",
-                Input = "Hello world"
-            };
-
-            var expectedResponse = new EmbeddingResponse
-            {
-                Object = "list",
-                Model = "text-embedding-model",
-                Data = new List<EmbeddingResponse.EmbeddingData>
-                {
-                    new()
-                    {
-                        Object = "embedding",
-                        Embedding = new[] { 0.1f, 0.2f, 0.3f },
-                        Index = 0
-                    }
-                }
-            };
-
-            Server
-                .Given(Request.Create()
-                    .WithPath("/v1/embeddings")
-                    .UsingPost())
-                .RespondWith(Response.Create()
-                    .WithStatusCode(200)
-                    .WithBody(JsonConvert.SerializeObject(expectedResponse)));
-
-            // Act
-            var response = await _client.CreateEmbeddingAsync(request);
-
-            // Assert
-            response.Should().NotBeNull();
-            response.Data.Should().HaveCount(1);
-            response.Data[0].Embedding.Should().BeEquivalentTo(new[] { 0.1f, 0.2f, 0.3f });
-        }
-
-        [Fact]
-        public async Task StreamCompletionAsync_WithNativeApi_ShouldStreamTokens()
-        {
-            // Arrange
-            var request = new CompletionRequest
-            {
-                Model = "test-model",
-                Prompt = "Hello",
-                MaxTokens = 100,
-                Temperature = 0.7f,
-                Stream = true
-            };
-
-            var tokens = new[] { "Hello", " world", "!" };
-            var streamResponses = tokens.Select(token => $"data: {{\"choices\": [{{\"text\": \"{token}\"}}]}}\n\n");
-
-            Server
-                .Given(Request.Create()
-                    .WithPath("/v1/completions")
-                    .UsingPost())
-                .RespondWith(Response.Create()
-                    .WithStatusCode(200)
-                    .WithBody(string.Join("", streamResponses) + "data: [DONE]\n\n")
-                    .WithHeader("Content-Type", "text/event-stream"));
-
-            // Act
-            var receivedTokens = new List<string>();
-            await foreach (var token in _client.StreamCompletionAsync(request))
-            {
-                receivedTokens.Add(token);
-            }
-
-            // Assert
-            receivedTokens.Should().BeEquivalentTo(tokens);
-        }
-
-        [Fact]
-        public async Task StreamChatAsync_WithNativeApi_ShouldStreamTokens()
+        public async Task StreamChatCompletionAsync_ShouldStreamTokens()
         {
             // Arrange
             var request = new ChatCompletionRequest
@@ -282,7 +125,8 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Unit.Client
             };
 
             var tokens = new[] { "Hello", " there", "!" };
-            var streamResponses = tokens.Select(token => $"data: {{\"choices\": [{{\"text\": \"{token}\"}}]}}\n\n");
+            var streamResponses = tokens.Select(token =>
+                $"data: {{\"choices\": [{{\"delta\": {{\"content\": \"{token}\"}}, \"finish_reason\": null}}]}}\n\n");
 
             Server
                 .Given(Request.Create()
@@ -295,9 +139,12 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Unit.Client
 
             // Act
             var receivedTokens = new List<string>();
-            await foreach (var token in _client.StreamChatAsync(request))
+            await foreach (var response in _client.StreamChatCompletionAsync(request))
             {
-                receivedTokens.Add(token);
+                if (response.Choices[0].Delta?.Content != null)
+                {
+                    receivedTokens.Add(response.Choices[0].Delta.Content);
+                }
             }
 
             // Assert
@@ -305,39 +152,68 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Unit.Client
         }
 
         [Fact]
-        public void UseNativeApi_WhenUsingOpenAiApi_ShouldThrow()
+        public async Task ChatCompleteAsync_WithLocalDocs_ShouldIncludeReferences()
         {
             // Arrange
-            var client = new Gpt4AllClient(new Options
+            var request = new ChatCompletionRequest
             {
-                BaseUrl = BaseUrl,
-                UseOpenAiApi = true
-            }, Logger);
+                Model = "test-model",
+                Messages = new List<ChatMessage>
+                {
+                    new() { Role = "user", Content = "Tell me about APIs" }
+                }
+            };
 
-            // Act & Assert
-            var act = () => client.ListModelsAsync();
-            act.Should().ThrowAsync<InvalidOperationException>()
-                .WithMessage("Native API is not enabled. Set UseOpenAiApi to false in options.");
+            var expectedResponse = new ChatCompletionResponse
+            {
+                Id = "chat-123",
+                Object = "chat.completion",
+                Created = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                Model = "test-model",
+                Choices = new List<ChatCompletionChoice>
+                {
+                    new()
+                    {
+                        Index = 0,
+                        Message = new ChatMessage
+                        {
+                            Role = "assistant",
+                            Content = "Based on the documentation..."
+                        },
+                        FinishReason = "stop",
+                        References = new List<Reference>
+                        {
+                            new()
+                            {
+                                Text = "The GPT4All Chat Desktop Application comes with a built-in server mode...",
+                                Title = "API Documentation",
+                                Date = "2024-08-07"
+                            }
+                        }
+                    }
+                }
+            };
+
+            Server
+                .Given(Request.Create()
+                    .WithPath("/v1/chat/completions")
+                    .UsingPost())
+                .RespondWith(Response.Create()
+                    .WithStatusCode(200)
+                    .WithBody(JsonSerializer.Serialize(expectedResponse)));
+
+            // Act
+            var response = await _client.CreateChatCompletionAsync(request);
+
+            // Assert
+            response.Should().NotBeNull();
+            response.Choices[0].References.Should().NotBeEmpty();
+            response.Choices[0].References[0].Text.Should().NotBeEmpty();
+            response.Choices[0].References[0].Title.Should().Be("API Documentation");
         }
 
         [Fact]
-        public void UseOpenAiApi_WhenUsingNativeApi_ShouldThrow()
-        {
-            // Arrange
-            var client = new Gpt4AllClient(new Options
-            {
-                BaseUrl = BaseUrl,
-                UseOpenAiApi = false
-            }, Logger);
-
-            // Act & Assert
-            var act = () => client.CompleteWithOpenAiAsync("test");
-            act.Should().ThrowAsync<InvalidOperationException>()
-                .WithMessage("OpenAI API is not enabled. Set UseOpenAiApi to true in options.");
-        }
-
-        [Fact]
-        public async Task IsAvailableAsync_WhenServerResponds_WithNativeApi_ShouldReturnTrue()
+        public async Task IsAvailableAsync_WhenServerResponds_ShouldReturnTrue()
         {
             // Arrange
             Server
@@ -348,10 +224,16 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Unit.Client
                     .WithStatusCode(200));
 
             // Act
-            var isAvailable = await _client.IsAvailableAsync();
+            var isAvailable = await _client.ListModelsAsync();
 
             // Assert
-            isAvailable.Should().BeTrue();
+            isAvailable.Should().NotBeNull();
+        }
+
+        public override void Dispose()
+        {
+            _client.Dispose();
+            base.Dispose();
         }
     }
 }

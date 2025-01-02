@@ -9,7 +9,7 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Integration.Providers.OpenAiCompatible
 {
     public abstract class OpenAiTestBase : IAsyncLifetime
     {
-        protected readonly ILocalAiProvider Provider;
+        protected readonly IGpt4AllSharpOpenAiCompatibleProvider CompatibleProvider;
         protected readonly ITestOutputHelper Output;
         protected readonly ILogger Logger;
         protected bool ServerAvailable;
@@ -32,7 +32,7 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Integration.Providers.OpenAiCompatible
                 NullValueHandling = NullValueHandling.Ignore
             };
 
-            Provider = new LocalAiProvider(
+            CompatibleProvider = new Gpt4AllSharpOpenAiCompatibleProvider(
                 httpClient, 
                 modelName: "",
                 logger: Logger, 
@@ -43,7 +43,7 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Integration.Providers.OpenAiCompatible
         {
             try
             {
-                ServerAvailable = await Provider.IsAvailableAsync();
+                ServerAvailable = await CompatibleProvider.IsAvailableAsync();
                 if (ServerAvailable)
                 {
                     Output.WriteLine("OpenAI API endpoint is available");
@@ -63,7 +63,7 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Integration.Providers.OpenAiCompatible
 
         public Task DisposeAsync()
         {
-            if (Provider is IDisposable disposable)
+            if (CompatibleProvider is IDisposable disposable)
             {
                 disposable.Dispose();
             }
