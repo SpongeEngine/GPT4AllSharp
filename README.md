@@ -1,4 +1,4 @@
-# GPT4AllSharp (In Progress)
+# GPT4AllSharp
 [![NuGet](https://img.shields.io/nuget/v/LocalAI.NET.KoboldCpp.svg)](https://www.nuget.org/packages/LocalAI.NET.KoboldCpp)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/LocalAI.NET.KoboldCpp.svg)](https://www.nuget.org/packages/LocalAI.NET.KoboldCpp)
 [![Tests](https://github.com/SpongeEngine/GPT4AllSharp/actions/workflows/test.yml/badge.svg)](https://github.com/SpongeEngine/GPT4AllSharp/actions/workflows/test.yml)
