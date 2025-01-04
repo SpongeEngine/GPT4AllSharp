@@ -5,7 +5,7 @@ using SpongeEngine.GPT4AllSharp.Tests.Common;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace SpongeEngine.GPT4AllSharp.Tests.Integration.Providers.OpenAiCompatible
+namespace SpongeEngine.GPT4AllSharp.Tests.Integration.Providers
 {
     public abstract class TestBase : IAsyncLifetime
     {
@@ -32,7 +32,7 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Integration.Providers.OpenAiCompatible
                 NullValueHandling = NullValueHandling.Ignore
             };
 
-            CompatibleProvider = new Gpt4AllSharpOpenAiCompatibleProvider(
+            CompatibleProvider = new GPT4AllSharp.Providers.GPT4AllSharpOpenAiCompatible.Gpt4AllSharpOpenAiCompatibleProvider(
                 httpClient, 
                 modelName: "Llama 3.2 3B Instruct",
                 logger: Logger, 

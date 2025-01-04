@@ -1,9 +1,7 @@
-﻿using System.Runtime.CompilerServices;
-using System.Text;
+﻿using System.Text;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SpongeEngine.GPT4AllSharp.Models;
-using JsonException = Newtonsoft.Json.JsonException;
 
 namespace SpongeEngine.GPT4AllSharp.Providers.GPT4AllSharpOpenAiCompatible
 {

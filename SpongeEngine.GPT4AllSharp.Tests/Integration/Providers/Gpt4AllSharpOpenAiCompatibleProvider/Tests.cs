@@ -3,7 +3,7 @@ using SpongeEngine.GPT4AllSharp.Providers.GPT4AllSharpOpenAiCompatible;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace SpongeEngine.GPT4AllSharp.Tests.Integration.Providers.OpenAiCompatible
+namespace SpongeEngine.GPT4AllSharp.Tests.Integration.Providers.Gpt4AllSharpOpenAiCompatibleProvider
 {
     [Trait("Category", "Integration")]
     [Trait("API", "OpenAI")]
@@ -52,7 +52,19 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Integration.Providers.OpenAiCompatible
             response.Should().NotBeNullOrEmpty();
             Output.WriteLine($"Completion response: {response}");
         }
+        
+        [SkippableFact]
+        [Trait("Category", "Integration")]
+        public async Task IsAvailableAsync_ShouldReturnTrueWhenServerResponds()
+        {
+            // Act
+            var isAvailable = await CompatibleProvider.IsAvailableAsync();
 
+            // Assert
+            isAvailable.Should().BeTrue();
+            Output.WriteLine("Server availability confirmed");
+        }
+        
         [SkippableFact]
         [Trait("Category", "Integration")]
         public async Task Complete_WithDifferentTemperatures_ShouldWork()

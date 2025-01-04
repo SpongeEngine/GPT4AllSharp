@@ -19,7 +19,7 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Unit.Client
         {
             _client = new Gpt4AllClient(new ClientOptions
             {
-                Port = 4891
+                Port = Server.Ports[0] // Use WireMock's port instead of 4891
             }, Logger);
         }
 
