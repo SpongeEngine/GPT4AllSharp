@@ -39,7 +39,6 @@ namespace SpongeEngine.GPT4AllSharp.Providers.GPT4AllSharpOpenAiCompatible
                 max_tokens = options?.MaxTokens ?? 80,
                 temperature = options?.Temperature ?? 0.7f,
                 top_p = options?.TopP ?? 0.9f,
-                stop = options?.StopSequences,
                 stream = false
             };
 
@@ -63,72 +62,73 @@ namespace SpongeEngine.GPT4AllSharp.Providers.GPT4AllSharpOpenAiCompatible
             return result?.Choices.FirstOrDefault()?.Text ?? string.Empty;
         }
 
-        public async IAsyncEnumerable<string> StreamCompletionAsync(
-            string prompt,
-            CompletionOptions? options = null,
-            [EnumeratorCancellation] CancellationToken cancellationToken = default)
-        {
-            var request = new
-            {
-                model = options?.ModelName ?? _modelName,
-                prompt = prompt,
-                max_tokens = options?.MaxTokens ?? 80,
-                temperature = options?.Temperature ?? 0.7f,
-                top_p = options?.TopP ?? 0.9f,
-                stop = options?.StopSequences,
-                stream = true
-            };
-
-            var requestJson = JsonConvert.SerializeObject(request, _jsonSettings);
-            _logger?.LogDebug("OpenAI streaming request: {Payload}", requestJson);
-
-            var content = new StringContent(requestJson, Encoding.UTF8, "application/json");
-
-            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, "v1/completions")
-            {
-                Content = content
-            };
-
-            using var response = await _httpClient.SendAsync(httpRequest, 
-                HttpCompletionOption.ResponseHeadersRead, 
-                cancellationToken);
-
-            response.EnsureSuccessStatusCode();
-
-            using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            using var reader = new StreamReader(stream);
-
-            while (!reader.EndOfStream)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                var line = await reader.ReadLineAsync();
-                if (string.IsNullOrEmpty(line) || !line.StartsWith("data: "))
-                    continue;
-
-                var data = line.Substring(6);
-                if (data == "[DONE]")
-                    break;
-
-                StreamCompletion completion = null;
-                string text = null;
-
-                try 
-                {
-                    completion = JsonConvert.DeserializeObject<StreamCompletion>(data);
-                    text = completion?.Choices?.FirstOrDefault()?.Text;
-                }
-                catch (JsonException ex)
-                {
-                    _logger?.LogWarning(ex, "Failed to parse SSE message: {Message}", data);
-                }
-
-                if (!string.IsNullOrEmpty(text))
-                {
-                    yield return text;
-                }
-            }
-        }
+        // Streaming not yet supported by the server, as per https://github.com/nomic-ai/gpt4all/blob/c7d734518818be946e40ec44644b8b098dd557ab/gpt4all-chat/src/server.cpp
+        // public async IAsyncEnumerable<string> StreamCompletionAsync(
+        //     string prompt,
+        //     CompletionOptions? options = null,
+        //     [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        // {
+        //     var request = new
+        //     {
+        //         model = options?.ModelName ?? _modelName,
+        //         prompt = prompt,
+        //         max_tokens = options?.MaxTokens ?? 80,
+        //         temperature = options?.Temperature ?? 0.7f,
+        //         top_p = options?.TopP ?? 0.9f,
+        //         stop = options?.StopSequences,
+        //         stream = true
+        //     };
+        //
+        //     var requestJson = JsonConvert.SerializeObject(request, _jsonSettings);
+        //     _logger?.LogDebug("OpenAI streaming request: {Payload}", requestJson);
+        //
+        //     var content = new StringContent(requestJson, Encoding.UTF8, "application/json");
+        //
+        //     using var httpRequest = new HttpRequestMessage(HttpMethod.Post, "v1/completions")
+        //     {
+        //         Content = content
+        //     };
+        //
+        //     using var response = await _httpClient.SendAsync(httpRequest, 
+        //         HttpCompletionOption.ResponseHeadersRead, 
+        //         cancellationToken);
+        //
+        //     response.EnsureSuccessStatusCode();
+        //
+        //     using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        //     using var reader = new StreamReader(stream);
+        //
+        //     while (!reader.EndOfStream)
+        //     {
+        //         cancellationToken.ThrowIfCancellationRequested();
+        //
+        //         var line = await reader.ReadLineAsync();
+        //         if (string.IsNullOrEmpty(line) || !line.StartsWith("data: "))
+        //             continue;
+        //
+        //         var data = line.Substring(6);
+        //         if (data == "[DONE]")
+        //             break;
+        //
+        //         StreamCompletion completion = null;
+        //         string text = null;
+        //
+        //         try 
+        //         {
+        //             completion = JsonConvert.DeserializeObject<StreamCompletion>(data);
+        //             text = completion?.Choices?.FirstOrDefault()?.Text;
+        //         }
+        //         catch (JsonException ex)
+        //         {
+        //             _logger?.LogWarning(ex, "Failed to parse SSE message: {Message}", data);
+        //         }
+        //
+        //         if (!string.IsNullOrEmpty(text))
+        //         {
+        //             yield return text;
+        //         }
+        //     }
+        // }
         
         private class StreamCompletion
         {

@@ -25,7 +25,7 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Integration.Providers.OpenAiCompatible
                     MaxTokens = 20,
                     Temperature = 0.7f,
                     TopP = 0.9f
-                });
+                }); 
 
             // Assert
             response.Should().NotBeNullOrEmpty();
@@ -46,7 +46,6 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Integration.Providers.OpenAiCompatible
                     MaxTokens = 20,
                     Temperature = 0.7f,
                     TopP = 0.9f,
-                    StopSequences = new[] { "." }
                 });
 
             // Assert
@@ -83,89 +82,91 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Integration.Providers.OpenAiCompatible
             }
         }
 
-        [SkippableFact]
-        [Trait("Category", "Integration")]
-        public async Task StreamCompletion_ShouldStreamTokens()
-        {
-            Skip.If(!ServerAvailable, "OpenAI endpoint not available");
+        // Streaming not yet supported by the server, as per https://github.com/nomic-ai/gpt4all/blob/c7d734518818be946e40ec44644b8b098dd557ab/gpt4all-chat/src/server.cpp
+        // [SkippableFact]
+        // [Trait("Category", "Integration")]
+        // public async Task StreamCompletion_ShouldStreamTokens()
+        // {
+        //     Skip.If(!ServerAvailable, "OpenAI endpoint not available");
+        //
+        //     // Arrange
+        //     var options = new CompletionOptions
+        //     {
+        //         MaxTokens = 20,
+        //         Temperature = 0.7f,
+        //         TopP = 0.9f
+        //     };
+        //
+        //     // Act
+        //     var tokens = new List<string>();
+        //     using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        //
+        //     try
+        //     {
+        //         await foreach (var token in CompatibleProvider.StreamCompletionAsync(
+        //             "Write a short story about",
+        //             options,
+        //             cts.Token))
+        //         {
+        //             tokens.Add(token);
+        //             Output.WriteLine($"Received token: {token}");
+        //
+        //             if (tokens.Count >= options.MaxTokens)
+        //                 break;
+        //         }
+        //     }
+        //     catch (OperationCanceledException) when (cts.Token.IsCancellationRequested)
+        //     {
+        //         Output.WriteLine($"Stream timed out after receiving {tokens.Count} tokens");
+        //     }
+        //
+        //     // Assert
+        //     tokens.Should().NotBeEmpty();
+        //     string.Concat(tokens).Should().NotBeNullOrEmpty();
+        // }
 
-            // Arrange
-            var options = new CompletionOptions
-            {
-                MaxTokens = 20,
-                Temperature = 0.7f,
-                TopP = 0.9f
-            };
-
-            // Act
-            var tokens = new List<string>();
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-
-            try
-            {
-                await foreach (var token in CompatibleProvider.StreamCompletionAsync(
-                    "Write a short story about",
-                    options,
-                    cts.Token))
-                {
-                    tokens.Add(token);
-                    Output.WriteLine($"Received token: {token}");
-
-                    if (tokens.Count >= options.MaxTokens)
-                        break;
-                }
-            }
-            catch (OperationCanceledException) when (cts.Token.IsCancellationRequested)
-            {
-                Output.WriteLine($"Stream timed out after receiving {tokens.Count} tokens");
-            }
-
-            // Assert
-            tokens.Should().NotBeEmpty();
-            string.Concat(tokens).Should().NotBeNullOrEmpty();
-        }
-
-        [SkippableFact]
-        [Trait("Category", "Integration")]
-        public async Task StreamCompletion_WithStopSequence_ShouldWork()
-        {
-            Skip.If(!ServerAvailable, "OpenAI endpoint not available");
-
-            // Arrange
-            var options = new CompletionOptions
-            {
-                MaxTokens = 20,
-                Temperature = 0.7f,
-                TopP = 0.9f,
-                StopSequences = new[] { "." }
-            };
-
-            // Act
-            var tokens = new List<string>();
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-
-            try
-            {
-                await foreach (var token in CompatibleProvider.StreamCompletionAsync(
-                    "Write a short story about",
-                    options,
-                    cts.Token))
-                {
-                    tokens.Add(token);
-                    Output.WriteLine($"Received token: {token}");
-
-                    if (tokens.Count >= options.MaxTokens)
-                        break;
-                }
-            }
-            catch (OperationCanceledException) when (cts.Token.IsCancellationRequested)
-            {
-                Output.WriteLine($"Stream timed out after receiving {tokens.Count} tokens");
-            }
-
-            // Assert
-            tokens.Should().NotBeEmpty();
-            string.Concat(tokens).Should().NotBeNullOrEmpty();
-        }
+        // Streaming not yet supported by the server, as per https://github.com/nomic-ai/gpt4all/blob/c7d734518818be946e40ec44644b8b098dd557ab/gpt4all-chat/src/server.cpp
+        // [SkippableFact]
+        // [Trait("Category", "Integration")]
+        // public async Task StreamCompletion_WithStopSequence_ShouldWork()
+        // {
+        //     Skip.If(!ServerAvailable, "OpenAI endpoint not available");
+        //
+        //     // Arrange
+        //     var options = new CompletionOptions
+        //     {
+        //         MaxTokens = 20,
+        //         Temperature = 0.7f,
+        //         TopP = 0.9f,
+        //         StopSequences = new[] { "." }
+        //     };
+        //
+        //     // Act
+        //     var tokens = new List<string>();
+        //     using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        //
+        //     try
+        //     {
+        //         await foreach (var token in CompatibleProvider.StreamCompletionAsync(
+        //             "Write a short story about",
+        //             options,
+        //             cts.Token))
+        //         {
+        //             tokens.Add(token);
+        //             Output.WriteLine($"Received token: {token}");
+        //
+        //             if (tokens.Count >= options.MaxTokens)
+        //                 break;
+        //         }
+        //     }
+        //     catch (OperationCanceledException) when (cts.Token.IsCancellationRequested)
+        //     {
+        //         Output.WriteLine($"Stream timed out after receiving {tokens.Count} tokens");
+        //     }
+        //
+        //     // Assert
+        //     tokens.Should().NotBeEmpty();
+        //     string.Concat(tokens).Should().NotBeNullOrEmpty();
+        // }
     }
 }

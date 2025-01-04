@@ -41,19 +41,20 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Unit.Providers.GPT4AllSharpOpenAiCompa
             response.Should().Be(expectedResponse);
         }
 
-        [Fact]
-        public async Task StreamCompletionAsync_WithValidPrompt_StreamsTokensCorrectly()
-        {
-            // Arrange
-            var tokens = new[] { "Hello", " world", "!" };
-            SetupStreamingEndpoint(tokens);
-
-            // Act
-            var receivedTokens = await CollectStreamedTokens("Test prompt");
-
-            // Assert
-            receivedTokens.Should().BeEquivalentTo(tokens);
-        }
+        // Streaming not yet supported by the server, as per https://github.com/nomic-ai/gpt4all/blob/c7d734518818be946e40ec44644b8b098dd557ab/gpt4all-chat/src/server.cpp
+        // [Fact]
+        // public async Task StreamCompletionAsync_WithValidPrompt_StreamsTokensCorrectly()
+        // {
+        //     // Arrange
+        //     var tokens = new[] { "Hello", " world", "!" };
+        //     SetupStreamingEndpoint(tokens);
+        //
+        //     // Act
+        //     var receivedTokens = await CollectStreamedTokens("Test prompt");
+        //
+        //     // Assert
+        //     receivedTokens.Should().BeEquivalentTo(tokens);
+        // }
 
         [Fact]
         public async Task IsAvailableAsync_WhenServerResponds_ReturnsTrue()
@@ -104,15 +105,17 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Unit.Providers.GPT4AllSharpOpenAiCompa
                     .WithStatusCode(200));
         }
 
-        private async Task<List<string>> CollectStreamedTokens(string prompt)
-        {
-            var receivedTokens = new List<string>();
-            await foreach (var token in _provider.StreamCompletionAsync(prompt))
-            {
-                receivedTokens.Add(token);
-            }
-            return receivedTokens;
-        }
+        
+        // Streaming not yet supported by the server, as per https://github.com/nomic-ai/gpt4all/blob/c7d734518818be946e40ec44644b8b098dd557ab/gpt4all-chat/src/server.cpp
+        // private async Task<List<string>> CollectStreamedTokens(string prompt)
+        // {
+        //     var receivedTokens = new List<string>();
+        //     await foreach (var token in _provider.StreamCompletionAsync(prompt))
+        //     {
+        //         receivedTokens.Add(token);
+        //     }
+        //     return receivedTokens;
+        // }
 
         public override void Dispose()
         {

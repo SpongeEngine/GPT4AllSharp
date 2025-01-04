@@ -14,6 +14,6 @@ namespace SpongeEngine.GPT4AllSharp.Models
         public string OwnedBy { get; set; } = string.Empty;
 
         [JsonPropertyName("permissions")]
-        public string[]? Permissions { get; set; }
+        public ModelPermission[]? Permissions { get; set; }
     }
 }

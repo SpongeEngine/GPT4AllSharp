@@ -34,7 +34,7 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Integration.Providers.OpenAiCompatible
 
             CompatibleProvider = new Gpt4AllSharpOpenAiCompatibleProvider(
                 httpClient, 
-                modelName: "",
+                modelName: "Llama 3.2 3B Instruct",
                 logger: Logger, 
                 jsonSettings: jsonSettings);
         }
