@@ -1,7 +1,7 @@
 # GPT4AllSharp (In Progress)
 [![NuGet](https://img.shields.io/nuget/v/LocalAI.NET.KoboldCpp.svg)](https://www.nuget.org/packages/LocalAI.NET.KoboldCpp)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/LocalAI.NET.KoboldCpp.svg)](https://www.nuget.org/packages/LocalAI.NET.KoboldCpp)
-[![Tests](https://github.com/SpongeEngine/KoboldSharp/actions/workflows/test.yml/badge.svg)](https://github.com/SpongeEngine/KoboldSharp/actions/workflows/test.yml)
+[![Tests](https://github.com/SpongeEngine/GPT4AllSharp/actions/workflows/test.yml/badge.svg)](https://github.com/SpongeEngine/GPT4AllSharp/actions/workflows/test.yml)
 [![License](https://img.shields.io/github/license/SpongeEngine/LocalAI.NET.KoboldCpp)](LICENSE)
 [![.NET](https://img.shields.io/badge/.NET-6.0%20%7C%207.0%20%7C%208.0%2B-512BD4)](https://dotnet.microsoft.com/download)
 
