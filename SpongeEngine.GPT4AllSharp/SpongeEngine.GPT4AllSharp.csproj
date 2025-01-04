@@ -8,10 +8,10 @@
         <!-- Package Info -->
         <PackageId>SpongeEngine.GPT4AllSharp</PackageId>
         <Title>GPT4AllSharp</Title>
-        <Version>1.0.1</Version>
+        <Version>1.1.1</Version>
         <Authors>Dan Clipca</Authors>
         <Company>Sponge Engine</Company>
-        <Description>A .NET client library for GPT4All, providing a simple and efficient way to interact with GPT4All's text generation capabilities in your .NET applications. This library offers support for both LM Studio's native API and its OpenAI-compatible endpoints. This package serves as the LM Studio integration layer for the LocalAI.NET ecosystem.</Description>
+        <Description>C# client for interacting with GPT4All through its OpenAI-compatible endpoints.</Description>
 
         <!-- Package Details -->
         <PackageTags>llm, ai, openai, localai, lm-studio, local-llm, offline-ai, self-hosted-ai, llama, gpt, neural-network, machine-learning, 
