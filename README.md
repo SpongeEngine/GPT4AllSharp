@@ -5,9 +5,7 @@
 [![License](https://img.shields.io/github/license/SpongeEngine/GPT4AllSharp)](LICENSE)
 [![.NET](https://img.shields.io/badge/.NET-6.0%20%7C%207.0%20%7C%208.0%2B-512BD4)](https://dotnet.microsoft.com/download)
 
-A .NET client library for GPT4All, providing a simple and efficient way to interact with GPT4All's text generation capabilities in your .NET applications. This library offers support for both GPT4All's native API and its OpenAI-compatible endpoints.
-
-This package serves as the GPT4All integration layer for the [LocalAI.NET](https://github.com/SpongeEngine/LocalAI.NET) ecosystem.
+C# client for interacting with GPT4All through its OpenAI-compatible endpoints.
 
 ## Features
 - Complete support for GPT4All's native API
