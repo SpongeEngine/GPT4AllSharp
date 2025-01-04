@@ -7,9 +7,9 @@ namespace SpongeEngine.GPT4AllSharp.Tests.Integration.Providers.OpenAiCompatible
 {
     [Trait("Category", "Integration")]
     [Trait("API", "OpenAI")]
-    public class OpenAiCompletionTests : OpenAiTestBase
+    public class Tests : TestBase
     {
-        public OpenAiCompletionTests(ITestOutputHelper output) : base(output) { }
+        public Tests(ITestOutputHelper output) : base(output) { }
 
         [SkippableFact]
         [Trait("Category", "Integration")]

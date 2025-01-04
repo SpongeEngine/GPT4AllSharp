@@ -7,14 +7,14 @@ using Xunit.Abstractions;
 
 namespace SpongeEngine.GPT4AllSharp.Tests.Integration.Providers.OpenAiCompatible
 {
-    public abstract class OpenAiTestBase : IAsyncLifetime
+    public abstract class TestBase : IAsyncLifetime
     {
         protected readonly IGpt4AllSharpOpenAiCompatibleProvider CompatibleProvider;
         protected readonly ITestOutputHelper Output;
         protected readonly ILogger Logger;
         protected bool ServerAvailable;
 
-        protected OpenAiTestBase(ITestOutputHelper output)
+        protected TestBase(ITestOutputHelper output)
         {
             Output = output;
             Logger = LoggerFactory
